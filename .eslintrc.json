@@ -19,7 +19,11 @@
   ],
   "rules": {
     "camelcase": "off",
-    "no-underscore-dangle": "off"
+    "no-underscore-dangle": "off",
+    "import/no-extraneous-dependencies": [
+      "error",
+      { "devDependencies": ["**/*.spec.ts", "jest.config.js", "jest-setup.js"] }
+    ]
   },
   "settings": {
     "import/parsers": {
