@@ -17,7 +17,7 @@ module.exports = {
     '!**/node_modules/**',
     '!**/vendor/**',
   ],
-  // setupFiles: ['<rootDir>/jest-setup.js'],
+  setupFiles: ['<rootDir>/jest-setup.js'],
   clearMocks: true,
   coverageProvider: 'v8',
   coverageReporters: ['text-summary', 'lcov'],
