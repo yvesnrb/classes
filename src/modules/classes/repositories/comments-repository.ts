@@ -48,6 +48,7 @@ export default class CommentsRepository {
       .find(filters)
       .limit(limit)
       .skip(skip)
+      .sort({ date_created: -1 })
       .toArray();
 
     return list;
