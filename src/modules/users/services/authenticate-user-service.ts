@@ -40,7 +40,7 @@ export default class AuthenticateUserService {
     }
 
     const token = jwt.sign({}, secret, {
-      subject: user._id,
+      subject: user._id.toString(),
       expiresIn: expiration,
     });
 
