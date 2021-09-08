@@ -13,6 +13,7 @@ module.exports = {
     '<rootDir>/src/modules/**/*.ts',
     '!<rootDir>/src/modules/**/schemas/*.ts',
     '!<rootDir>/src/modules/**/routes/*.ts',
+    '!<rootDir>/src/modules/**/controllers/*.ts',
     '!<rootDir>/src/**/i-*.ts',
     '!**/node_modules/**',
     '!**/vendor/**',
