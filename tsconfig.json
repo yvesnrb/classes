@@ -14,23 +14,28 @@
       "@errors/*": ["errors/*"],
       "@http/*": [
         "modules/shared/http/*",
-        "modules/users/http/*"
+        "modules/users/http/*",
+        "modules/classes/http/*"
       ],
       "@dtos/*": [
         "modules/shared/dtos/*",
-        "modules/users/dtos/*"
+        "modules/users/dtos/*",
+        "modules/classes/dtos/*"
       ],
       "@entities/*": [
         "modules/shared/entities/*",
-        "modules/users/entities/*"
+        "modules/users/entities/*",
+        "modules/classes/entities/*"
       ],
       "@repositories/*": [
         "modules/shared/repositories/*",
-        "modules/users/repositories/*"
+        "modules/users/repositories/*",
+        "modules/classes/repositories/*"
       ],
       "@services/*": [
         "modules/shared/services/*",
-        "modules/users/services/*"
+        "modules/users/services/*",
+        "modules/classes/services/*"
       ]
     },
     "esModuleInterop": true,
