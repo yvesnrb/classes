@@ -1,4 +1,9 @@
-const x = 1;
-const y = 2;
+import 'dotenv/config';
 
-console.log(x + y);
+import app from '@http/server';
+import serverConfig from '@config/server';
+
+app.listen(serverConfig.port, () => {
+  // eslint-disable-next-line no-console
+  console.log(`🚀 Server listening on localhost:${serverConfig.port}`);
+});
