@@ -1,5 +1,4 @@
 import ListClassesService from '@services/list-classes-service';
-import Class from '@entities/class-entity';
 
 const mockClassesList = jest.fn().mockImplementation(() =>
   Array.from({ length: 3 }, (_, index) => ({

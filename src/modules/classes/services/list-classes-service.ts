@@ -43,45 +43,29 @@ export default class CreateClassService {
       data_end,
     }, skip, 50);
 
-    const lastComments = await Promise.all(
-      Array.from({ length: list.length }, async (_, index) => {
+    const listWithComments = await Promise.all(
+      list.map(async (myClass) => {
         const lastComment = await this.commentsRepository.list(
           {
-            id_class: list[index]._id,
+            id_class: myClass._id,
           },
           0,
           1,
         );
 
         const total_comments = await this.commentsRepository.collection.count({
-          id_class: list[index]._id,
+          id_class: myClass._id,
         });
 
-        if (lastComment.length === 0) {
-          return {
-            last_comment: null,
-            last_comment_date: null,
-            total_comments,
-          };
-        }
-
         return {
-          last_comment: lastComment[0].comment,
-          last_comment_date: lastComment[0].date_created,
+          ...myClass,
+          last_comment: lastComment[0]?.comment || null,
+          last_comment_date: lastComment[0]?.date_created || null,
           total_comments,
         };
       }),
     );
 
-    const response = Array.from({ length: list.length }, (_, index) => {
-      return {
-        ...list[index],
-        total_comments: lastComments[index].total_comments,
-        last_comment: lastComments[index].last_comment,
-        last_comment_date: lastComments[index].last_comment_date,
-      };
-    });
-
-    return response;
+    return listWithComments;
   }
 }
