@@ -4,8 +4,8 @@ interface ICreateClass {
   name: string;
   description: string;
   video: string;
-  data_init: Date;
-  data_end: Date;
+  dateInit: Date;
+  dateEnd: Date;
 }
 
 export default class Class {
@@ -32,22 +32,22 @@ export default class Class {
   /**
    * The date in which this class will become available.
    */
-  public data_init: Date;
+  public dateInit: Date;
 
   /**
    * The date in which this class will become unavailable.
    */
-  public data_end: Date;
+  public dateEnd: Date;
 
   /**
    * The date in which this class was created.
    */
-  public readonly date_created: Date;
+  public readonly dateCreated: Date;
 
   /**
    * The date in which this class was last updated.
    */
-  public readonly date_updated: Date;
+  public readonly dateUpdated: Date;
 
   /**
    * @param data - An instance of ICreateClass.
@@ -57,8 +57,8 @@ export default class Class {
       name,
       description,
       video,
-      data_init,
-      data_end,
+      dateInit,
+      dateEnd,
     } = data;
     const objectId = new ObjectId();
 
@@ -66,9 +66,9 @@ export default class Class {
     this.name = name;
     this.description = description;
     this.video = video;
-    this.data_init = data_init;
-    this.data_end = data_end;
-    this.date_created = new Date();
-    this.date_updated = new Date();
+    this.dateInit = dateInit;
+    this.dateEnd = dateEnd;
+    this.dateCreated = new Date();
+    this.dateUpdated = new Date();
   }
 }

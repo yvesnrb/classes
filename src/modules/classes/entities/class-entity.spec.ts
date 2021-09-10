@@ -3,41 +3,33 @@ import MockDate from 'mockdate';
 
 import Class from '@entities/class-entity';
 
-MockDate.set(new Date('01/01/2021 14:00:00.00Z'));
-
-const toHexString = jest.fn().mockImplementation(() => 'mock guid');
-
-jest.mock('mongodb', () => {
-  return {
-    ObjectId: jest.fn().mockImplementation(() => {
-      return {
-        toHexString,
-      };
-    }),
-  };
-});
-
 describe('ClassEntity', () => {
   it('should create a new class entity', () => {
+    MockDate.set(new Date('01/01/2021 14:00:00.00Z'));
+
+    const objectIdToHexStringSpy = jest
+      .spyOn(ObjectId.prototype, 'toHexString')
+      .mockReturnValue('mock-class-id');
+
     const myClass = new Class({
       name: 'Class 1',
       description: 'lorem ipsum dolorem sit amet',
       video: 'http://google.com',
-      data_init: new Date('01/01/2021 14:00:00'),
-      data_end: new Date('01/02/2021 14:00:00'),
+      dateInit: new Date('01/01/2021 14:00:00'),
+      dateEnd: new Date('01/02/2021 14:00:00'),
     });
 
-    expect(ObjectId).toHaveBeenCalled();
+    expect(objectIdToHexStringSpy).toHaveBeenCalled();
 
     expect(myClass).toEqual({
-      _id: 'mock guid',
+      _id: 'mock-class-id',
       name: 'Class 1',
       description: 'lorem ipsum dolorem sit amet',
       video: 'http://google.com',
-      data_init: new Date('01/01/2021 14:00:00'),
-      data_end: new Date('01/02/2021 14:00:00'),
-      date_created: new Date('01/01/2021 14:00:00.00Z'),
-      date_updated: new Date('01/01/2021 14:00:00.00Z'),
+      dateInit: new Date('01/01/2021 14:00:00'),
+      dateEnd: new Date('01/02/2021 14:00:00'),
+      dateCreated: new Date('01/01/2021 14:00:00.00Z'),
+      dateUpdated: new Date('01/01/2021 14:00:00.00Z'),
     });
   });
 });
