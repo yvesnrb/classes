@@ -1,16 +1,34 @@
+import { Collection } from 'mongodb';
+
 import ClassesRepository from '@repositories/classes-repository';
 import Class from '@entities/class-entity';
+import mongoConfig from '@config/mongodb';
 import mongoClient from '@/db';
 
 let classesRepository: ClassesRepository;
+let classesCollection: Collection<Class>;
+
+const mockClass: Class = {
+  _id: 'mock-class-id',
+  name: 'Class 1',
+  description: 'lorem ipsum dolorem sit amet',
+  video: 'http://google.com',
+  dateInit: new Date('01/01/2021 14:00:00'),
+  dateEnd: new Date('01/02/2021 14:00:00'),
+  dateCreated: new Date('01/01/2021 14:00:00'),
+  dateUpdated: new Date('01/01/2021 14:00:00'),
+};
 
 describe('UsersRepository', () => {
   beforeEach(async () => {
     classesRepository = new ClassesRepository();
+    classesCollection = mongoClient
+      .db(mongoConfig.database)
+      .collection<Class>('classes');
   });
 
   afterEach(async () => {
-    await classesRepository.collection.drop();
+    await classesCollection.drop();
   });
 
   beforeAll(async () => {
@@ -22,51 +40,34 @@ describe('UsersRepository', () => {
   });
 
   it('should find one class in the database', async () => {
-    await classesRepository.collection.insertOne({
-      _id: 'mock id',
+    await classesCollection.insertOne(mockClass);
+
+    const myClass = await classesRepository.find({ _id: 'mock-class-id' });
+
+    expect(myClass).toMatchObject({
+      _id: 'mock-class-id',
       name: 'Class 1',
       description: 'lorem ipsum dolorem sit amet',
       video: 'http://google.com',
-      data_init: new Date('01/01/2021 14:00:00'),
-      data_end: new Date('01/02/2021 14:00:00'),
-      date_created: new Date(),
-      date_updated: new Date(),
-    });
-
-    const user = await classesRepository.find({ _id: 'mock id' });
-
-    expect(user).toMatchObject({
-      _id: 'mock id',
-      name: 'Class 1',
-      description: 'lorem ipsum dolorem sit amet',
-      video: 'http://google.com',
-      data_init: new Date('01/01/2021 14:00:00'),
-      data_end: new Date('01/02/2021 14:00:00'),
+      dateInit: new Date('01/01/2021 14:00:00'),
+      dateEnd: new Date('01/02/2021 14:00:00'),
     });
   });
 
   it('should list many classes in the database', async () => {
     const classes = Array.from({ length: 50 }, (_, index) => ({
+      ...mockClass,
       _id: `${index + 1}`,
       name: `Class ${index + 1}`,
-      description: 'lorem ipsum dolorem sit amet',
-      video: 'http://google.com',
-      data_init: new Date('01/01/2021 14:00:00'),
-      data_end: new Date('01/02/2021 14:00:00'),
-      date_created: new Date(),
-      date_updated: new Date(),
     }));
 
     const partialClasses = Array.from({ length: 10 }, (_, index) => ({
+      ...mockClass,
       _id: `${index + 1}`,
       name: `Class ${index + 1}`,
-      description: 'lorem ipsum dolorem sit amet',
-      video: 'http://google.com',
-      data_init: new Date('01/01/2021 14:00:00'),
-      data_end: new Date('01/02/2021 14:00:00'),
     }));
 
-    await classesRepository.collection.insertMany(classes);
+    await classesCollection.insertMany(classes);
 
     const list = await classesRepository.list(
       { name: { $regex: 'Class' } },
@@ -86,13 +87,13 @@ describe('UsersRepository', () => {
       name: 'Class 1',
       description: 'lorem ipsum dolorem sit amet',
       video: 'http://google.com',
-      data_init: new Date('01/01/2021 14:00:00'),
-      data_end: new Date('01/02/2021 14:00:00'),
+      dateInit: new Date('01/01/2021 14:00:00'),
+      dateEnd: new Date('01/02/2021 14:00:00'),
     });
 
     await classesRepository.save(myClass);
 
-    const insertedClass = await classesRepository.collection.findOne({
+    const insertedClass = await classesCollection.findOne({
       name: 'Class 1',
     });
 
@@ -100,45 +101,26 @@ describe('UsersRepository', () => {
       name: 'Class 1',
       description: 'lorem ipsum dolorem sit amet',
       video: 'http://google.com',
-      data_init: new Date('01/01/2021 14:00:00'),
-      data_end: new Date('01/02/2021 14:00:00'),
+      dateInit: new Date('01/01/2021 14:00:00'),
+      dateEnd: new Date('01/02/2021 14:00:00'),
     });
   });
 
   it('should update a saved class', async () => {
-    await classesRepository.collection.insertOne({
-      _id: 'mock id',
-      name: 'Class 1',
-      description: 'lorem ipsum dolorem sit amet',
-      video: 'http://google.com',
-      data_init: new Date('01/01/2021 14:00:00'),
-      data_end: new Date('01/02/2021 14:00:00'),
-      date_created: new Date(),
-      date_updated: new Date(),
-    });
+    await classesCollection.insertOne(mockClass);
 
     await classesRepository.update({
-      _id: 'mock id',
-      name: 'New Title',
-      description: 'lorem ipsum dolorem sit amet',
-      video: 'http://google.com',
-      data_init: new Date('01/01/2021 14:00:00'),
-      data_end: new Date('01/02/2021 14:00:00'),
-      date_created: new Date(),
-      date_updated: new Date(),
+      ...mockClass,
+      description: 'Updated description.',
     });
 
-    const updatedClass = await classesRepository.collection.findOne({
-      _id: 'mock id',
+    const updatedClass = await classesCollection.findOne({
+      _id: 'mock-class-id',
     });
 
     expect(updatedClass).toMatchObject({
-      _id: 'mock id',
-      name: 'New Title',
-      description: 'lorem ipsum dolorem sit amet',
-      video: 'http://google.com',
-      data_init: new Date('01/01/2021 14:00:00'),
-      data_end: new Date('01/02/2021 14:00:00'),
+      ...mockClass,
+      description: 'Updated description.',
     });
   });
 });

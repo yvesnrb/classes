@@ -5,7 +5,7 @@ import mongoConfig from '@config/mongodb';
 import mongoClient from '@/db';
 
 export default class ClassesRepository {
-  public collection: Collection<Class>;
+  private collection: Collection<Class>;
 
   constructor() {
     this.collection = mongoClient
