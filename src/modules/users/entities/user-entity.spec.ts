@@ -4,42 +4,31 @@ import MockDate from 'mockdate';
 
 import User from '@entities/user-entity';
 
-MockDate.set(new Date('01/01/2021 14:00:00.00Z'));
-
-const toHexString = jest.fn().mockImplementation(() => 'mock guid');
-
-jest.mock('mongodb', () => {
-  return {
-    ObjectId: jest.fn().mockImplementation(() => {
-      return {
-        toHexString,
-      };
-    }),
-  };
-});
-
-jest.mock('bcryptjs', () => {
-  return {
-    hashSync: jest.fn().mockImplementation(() => 'mock hash'),
-  };
-});
-
 describe('UserEntity', () => {
   it('should create a new user entity', () => {
+    MockDate.set(new Date('01/01/2021 14:00:00.00Z'));
+
+    const objectIdToHexStringSpy = jest
+      .spyOn(ObjectId.prototype, 'toHexString')
+      .mockReturnValue('mock-user-id');
+
+    const bcryptHashSyncSpy = jest
+      .spyOn(bcrypt, 'hashSync')
+      .mockReturnValue('mock-hash');
+
     const user = new User('John Doe', 'j.doe@mail.com', 'pass');
 
-    expect(ObjectId).toHaveBeenCalled();
-    expect(toHexString).toHaveBeenCalled();
+    expect(objectIdToHexStringSpy).toHaveBeenCalled();
 
-    expect(bcrypt.hashSync).toHaveBeenCalledWith('pass', 8);
+    expect(bcryptHashSyncSpy).toHaveBeenCalledWith('pass', 8);
 
     expect(user).toEqual({
-      _id: 'mock guid',
+      _id: 'mock-user-id',
       name: 'John Doe',
       email: 'j.doe@mail.com',
-      password: 'mock hash',
-      date_created: new Date('01/01/2021 14:00:00.00Z'),
-      date_updated: new Date('01/01/2021 14:00:00.00Z'),
+      password: 'mock-hash',
+      dateCreated: new Date('01/01/2021 14:00:00.00Z'),
+      dateUpdated: new Date('01/01/2021 14:00:00.00Z'),
     });
   });
 });

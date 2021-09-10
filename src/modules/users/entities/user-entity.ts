@@ -25,12 +25,12 @@ export default class User {
   /**
    * The date in which this user was created.
    */
-  public readonly date_created: Date;
+  public readonly dateCreated: Date;
 
   /**
    * The date in which this user was last updated.
    */
-  public readonly date_updated: Date;
+  public readonly dateUpdated: Date;
 
   /**
    * @param name - The name of this user.
@@ -47,7 +47,7 @@ export default class User {
     this.name = name;
     this.email = email;
     this.password = passwordHash;
-    this.date_created = new Date();
-    this.date_updated = new Date();
+    this.dateCreated = new Date();
+    this.dateUpdated = new Date();
   }
 }
