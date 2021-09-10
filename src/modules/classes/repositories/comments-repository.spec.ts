@@ -1,16 +1,30 @@
+import { Collection } from 'mongodb';
+
 import CommentsRepository from '@repositories/comments-repository';
 import Comment from '@entities/comment-entity';
+import mongoConfig from '@config/mongodb';
 import mongoClient from '@/db';
 
 let commentsRepository: CommentsRepository;
+let commentsCollection: Collection<Comment>;
+
+const mockComment: Comment = {
+  _id: 'mock-comment-id',
+  classId: 'mock-class-id',
+  comment: 'this is a mock comment',
+  dateCreated: new Date('01/01/2021 14:00:00.00Z'),
+};
 
 describe('UsersRepository', () => {
   beforeEach(async () => {
     commentsRepository = new CommentsRepository();
+    commentsCollection = mongoClient
+      .db(mongoConfig.database)
+      .collection<Comment>('comments');
   });
 
   afterEach(async () => {
-    await commentsRepository.collection.drop();
+    await commentsCollection.drop();
   });
 
   beforeAll(async () => {
@@ -22,19 +36,9 @@ describe('UsersRepository', () => {
   });
 
   it('should count the documents in the database', async () => {
-    await commentsRepository.collection.insertMany([
-      {
-        _id: 'mock-comment-id-1',
-        id_class: 'mock-class-id',
-        comment: 'this is a mock comment',
-        date_created: new Date('01/01/2021 14:00:00.00Z'),
-      },
-      {
-        _id: 'mock-comment-id-2',
-        id_class: 'mock-class-id',
-        comment: 'this is another comment',
-        date_created: new Date('01/01/2021 14:00:00.00Z'),
-      },
+    await commentsCollection.insertMany([
+      { ...mockComment, _id: 'mock-comment-id-1' },
+      { ...mockComment, _id: 'mock-comment-id-2' },
     ]);
 
     const count = await commentsRepository.count({});
@@ -43,41 +47,28 @@ describe('UsersRepository', () => {
   });
 
   it('should find one comment in the database', async () => {
-    await commentsRepository.collection.insertOne({
-      _id: 'mock guid',
-      id_class: 'mock class id',
-      comment: 'this is a mock comment',
-      date_created: new Date('01/01/2021 14:00:00.00Z'),
-    });
+    await commentsCollection.insertOne(mockComment);
 
-    const comment = await commentsRepository.find({ _id: 'mock guid' });
+    const comment = await commentsRepository.find({ _id: 'mock-comment-id' });
 
-    expect(comment).toMatchObject({
-      _id: 'mock guid',
-      id_class: 'mock class id',
-      comment: 'this is a mock comment',
-      date_created: new Date('01/01/2021 14:00:00.00Z'),
-    });
+    expect(comment).toMatchObject(mockComment);
   });
 
   it('should list many comments in the database', async () => {
     const comments = Array.from({ length: 50 }, (_, index) => ({
+      ...mockComment,
       _id: `${index + 1}`,
-      id_class: 'mock class id',
-      comment: 'this is a mock comment',
-      date_created: new Date('01/01/2021 14:00:00.00Z'),
     }));
 
     const partialComments = Array.from({ length: 10 }, (_, index) => ({
+      ...mockComment,
       _id: `${index + 1}`,
-      id_class: 'mock class id',
-      comment: 'this is a mock comment',
     }));
 
-    await commentsRepository.collection.insertMany(comments);
+    await commentsCollection.insertMany(comments);
 
     const list = await commentsRepository.list(
-      { id_class: 'mock class id' },
+      { classId: 'mock-class-id' },
       0,
       10,
     );
@@ -90,44 +81,35 @@ describe('UsersRepository', () => {
   });
 
   it('should save a comment in the database', async () => {
-    const comment = new Comment('mock class id', 'this is a mock comment');
+    const comment = new Comment('mock-class-id', 'This is a mock comment.');
 
     await commentsRepository.save(comment);
 
-    const insertedComment = await commentsRepository.collection.findOne({
-      id_class: 'mock class id',
+    const insertedComment = await commentsCollection.findOne({
+      classId: 'mock-class-id',
     });
 
     expect(insertedComment).toMatchObject({
-      id_class: 'mock class id',
-      comment: 'this is a mock comment',
+      classId: 'mock-class-id',
+      comment: 'This is a mock comment.',
     });
   });
 
   it('should update a saved comment', async () => {
-    await commentsRepository.collection.insertOne({
-      _id: 'mock guid',
-      id_class: 'mock class id',
-      comment: 'this is a mock comment',
-      date_created: new Date('01/01/2021 14:00:00.00Z'),
-    });
+    await commentsCollection.insertOne(mockComment);
 
     await commentsRepository.update({
-      _id: 'mock guid',
-      id_class: 'mock class id',
-      comment: 'this is an updated comment',
-      date_created: new Date('01/01/2021 14:00:00.00Z'),
+      ...mockComment,
+      comment: 'This is an updated comment.',
     });
 
-    const updatedComment = await commentsRepository.collection.findOne({
-      _id: 'mock guid',
+    const updatedComment = await commentsCollection.findOne({
+      _id: 'mock-comment-id',
     });
 
     expect(updatedComment).toMatchObject({
-      _id: 'mock guid',
-      id_class: 'mock class id',
-      comment: 'this is an updated comment',
-      date_created: new Date('01/01/2021 14:00:00.00Z'),
+      ...mockComment,
+      comment: 'This is an updated comment.',
     });
   });
 });

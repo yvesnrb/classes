@@ -5,7 +5,7 @@ import mongoConfig from '@config/mongodb';
 import mongoClient from '@/db';
 
 export default class CommentsRepository {
-  public collection: Collection<Comment>;
+  private collection: Collection<Comment>;
 
   constructor() {
     this.collection = mongoClient
