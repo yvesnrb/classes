@@ -12,17 +12,17 @@ const mockClass: Class = {
   name: 'Class 1',
   description: 'lorem ipsum dolorem sit amet',
   video: 'http://google.com',
-  data_init: new Date('01/01/2021 14:00:00'),
-  data_end: new Date('01/02/2021 14:00:00'),
-  date_created: new Date('01/01/2021 14:00:00.00Z'),
-  date_updated: new Date('01/01/2021 14:00:00.00Z'),
+  dateInit: new Date('01/01/2021 14:00:00'),
+  dateEnd: new Date('01/02/2021 14:00:00'),
+  dateCreated: new Date('01/01/2021 14:00:00.00Z'),
+  dateUpdated: new Date('01/01/2021 14:00:00.00Z'),
 };
 
 const mockComment: Comment = {
   _id: 'mock-comment-id',
-  id_class: 'mock-class-id',
+  classId: 'mock-class-id',
   comment: 'this is a mock comment',
-  date_created: new Date('01/01/2021 14:00:00.00Z'),
+  dateCreated: new Date('01/01/2021 14:00:00.00Z'),
 };
 
 describe('FindClassService', () => {
@@ -48,20 +48,20 @@ describe('FindClassService', () => {
     expect(myClass).toStrictEqual({
       ...mockClass,
       comments: [mockComment],
-      total_comments: 1,
+      totalComments: 1,
     });
     expect(classesRepositoryFindSpy).toHaveBeenCalledWith({
       _id: 'mock-class-id',
     });
     expect(commentsRepositoryListSpy).toHaveBeenCalledWith(
       {
-        id_class: 'mock-class-id',
+        classId: 'mock-class-id',
       },
       0,
       3,
     );
     expect(commentsRepositoryCountSpy).toHaveBeenCalledWith({
-      id_class: 'mock-class-id',
+      classId: 'mock-class-id',
     });
   });
 

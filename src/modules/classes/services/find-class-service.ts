@@ -10,7 +10,7 @@ interface IRequest {
 
 interface IResponse extends Class {
   comments: Comment[];
-  total_comments: number;
+  totalComments: number;
 }
 
 export default class CreateClassService {
@@ -29,15 +29,15 @@ export default class CreateClassService {
 
     if (!myClass) throw new AppError('class not found', 404);
 
-    const comments = await this.commentsRepository.list({ id_class: id }, 0, 3);
-    const total_comments = await this.commentsRepository.count({
-      id_class: id,
+    const comments = await this.commentsRepository.list({ classId: id }, 0, 3);
+    const totalComments = await this.commentsRepository.count({
+      classId: id,
     });
 
     return {
       ...myClass,
       comments,
-      total_comments,
+      totalComments,
     };
   }
 }
