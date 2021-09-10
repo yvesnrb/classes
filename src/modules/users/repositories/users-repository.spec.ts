@@ -1,16 +1,32 @@
+import { Collection } from 'mongodb';
+
 import UsersRepository from '@repositories/users-repository';
 import User from '@entities/user-entity';
+import mongoConfig from '@config/mongodb';
 import mongoClient from '@/db';
 
 let usersRepository: UsersRepository;
+let usersCollection: Collection<User>;
+
+const mockUser: User = {
+  _id: 'mock-user-id',
+  email: 'j.doe@mail.com',
+  name: 'John Doe',
+  password: 'pass',
+  dateCreated: new Date('01-01-2021 13:00:00'),
+  dateUpdated: new Date('01-01-2021 13:00:00'),
+};
 
 describe('UsersRepository', () => {
   beforeEach(async () => {
     usersRepository = new UsersRepository();
+    usersCollection = mongoClient
+      .db(mongoConfig.database)
+      .collection<User>('users');
   });
 
   afterEach(async () => {
-    await usersRepository.collection.drop();
+    await usersCollection.drop();
   });
 
   beforeAll(async () => {
@@ -22,45 +38,29 @@ describe('UsersRepository', () => {
   });
 
   it('should find one user in the database', async () => {
-    await usersRepository.collection.insertOne({
-      _id: 'mock id',
-      email: 'j.doe@mail.com',
-      name: 'John Doe',
-      password: 'pass',
-      date_created: new Date(),
-      date_updated: new Date(),
-    });
+    await usersCollection.insertOne(mockUser);
 
-    const user = await usersRepository.find({ _id: 'mock id' });
+    const user = await usersRepository.find({ _id: 'mock-user-id' });
 
-    expect(user).toMatchObject({
-      _id: 'mock id',
-      email: 'j.doe@mail.com',
-      name: 'John Doe',
-      password: 'pass',
-    });
+    expect(user).toMatchObject(mockUser);
   });
 
   it('should list many users in the database', async () => {
     const users = Array.from({ length: 50 }, (_, index) => ({
+      ...mockUser,
       _id: `${index + 1}`,
-      name: `User ${index + 1}`,
       email: `${index + 1}@mail.com`,
-      password: 'pass',
-      date_created: new Date(),
-      date_updated: new Date(),
     }));
 
     const partialUsers = Array.from({ length: 10 }, (_, index) => ({
+      ...mockUser,
       _id: `${index + 1}`,
-      name: `User ${index + 1}`,
       email: `${index + 1}@mail.com`,
-      password: 'pass',
     }));
 
-    await usersRepository.collection.insertMany(users);
+    await usersCollection.insertMany(users);
 
-    const list = await usersRepository.list({ password: 'pass' }, 0, 10);
+    const list = await usersRepository.list({ name: 'John Doe' }, 0, 10);
 
     expect(list).toEqual(
       expect.arrayContaining(
@@ -70,11 +70,11 @@ describe('UsersRepository', () => {
   });
 
   it('should save an user in the database', async () => {
-    const user = new User('John Doe', 'j.doe@mail.com', 'senha');
+    const user = new User('John Doe', 'j.doe@mail.com', 'pass');
 
     await usersRepository.save(user);
 
-    const insertedUser = await usersRepository.collection.findOne({
+    const insertedUser = await usersCollection.findOne({
       email: 'j.doe@mail.com',
     });
 
@@ -85,33 +85,20 @@ describe('UsersRepository', () => {
   });
 
   it('should update a saved user', async () => {
-    await usersRepository.collection.insertOne({
-      _id: 'mock id',
-      email: 'j.doe@mail.com',
-      name: 'John Doe',
-      password: 'pass',
-      date_created: new Date(),
-      date_updated: new Date(),
-    });
+    await usersCollection.insertOne(mockUser);
 
     await usersRepository.update({
-      _id: 'mock id',
+      ...mockUser,
       email: 'updated@mail.com',
-      name: 'John Updated',
-      password: 'pass',
-      date_created: new Date(),
-      date_updated: new Date(),
     });
 
-    const updatedUser = await usersRepository.collection.findOne({
-      _id: 'mock id',
+    const updatedUser = await usersCollection.findOne({
+      _id: 'mock-user-id',
     });
 
     expect(updatedUser).toMatchObject({
-      _id: 'mock id',
+      ...mockUser,
       email: 'updated@mail.com',
-      name: 'John Updated',
-      password: 'pass',
     });
   });
 });
