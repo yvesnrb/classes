@@ -20,7 +20,7 @@
     "import"
   ],
   "rules": {
-    "camelcase": "off",
+    "camelcase": "warn",
     "no-underscore-dangle": "off",
     "class-methods-use-this": "off",
     "@typescript-eslint/naming-convention": "off",
