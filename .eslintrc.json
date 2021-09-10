@@ -28,6 +28,10 @@
     ],
     "class-methods-use-this": "off",
     "@typescript-eslint/naming-convention": "warn",
+    "max-len": [
+      "warn",
+      { "code": 80 }
+    ],
     "implicit-arrow-linebreak": "off",
     "import/no-extraneous-dependencies": [
       "error",
