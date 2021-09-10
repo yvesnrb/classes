@@ -1,82 +1,66 @@
 import CreateUserService from '@services/create-user-service';
 import User from '@entities/user-entity';
+import UsersRepository from '@repositories/users-repository';
 import AppError from '@errors/app-error';
 
-const mockSave = jest.fn().mockImplementation(() => ({
-  _id: 'mock id',
-  name: 'mock name',
-  email: 'mock email',
+let createUser: CreateUserService;
+
+const mockUser: User = {
+  _id: 'mock-user-id',
+  name: 'John Doe',
+  email: 'j.doe@mail.com',
   password: 'pass',
-  date_created: new Date('2021-01-01 14:00:00'),
-  date_updated: new Date('2021-01-01 14:00:00'),
-}));
+  dateCreated: new Date('2021-01-01 14:00:00'),
+  dateUpdated: new Date('2021-01-01 14:00:00'),
+};
 
-const mockFind = jest.fn().mockImplementation(() => null);
-
-jest.mock('@repositories/users-repository', () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      save: mockSave,
-      find: mockFind,
-    };
-  });
-});
-
-jest.mock('@entities/user-entity', () => {
-  return jest.fn().mockImplementation(() => ({
-    _id: 'mock id',
-    name: 'mock name',
-    email: 'mock email',
-    password: 'pass',
-    date_created: new Date('2021-01-01 14:00:00'),
-    date_updated: new Date('2021-01-01 14:00:00'),
-  }));
-});
+jest.mock('@entities/user-entity', () =>
+  jest.fn().mockImplementation(() => mockUser));
 
 describe('CreateUserService', () => {
+  beforeEach(() => {
+    createUser = new CreateUserService();
+  });
+
   it('should create a new user', async () => {
-    const createUser = new CreateUserService();
+    const usersRepositoryFindSpy = jest
+      .spyOn(UsersRepository.prototype, 'find')
+      .mockReturnValue(Promise.resolve(null));
 
-    const createdUser = await createUser.execute({
-      name: 'John Doe',
-      email: 'j.doe@mail.com',
-      password: 'pass',
+    const usersRepositorySaveSpy = jest
+      .spyOn(UsersRepository.prototype, 'save')
+      .mockReturnValue(Promise.resolve(undefined));
+
+    const user = await createUser.execute({
+      name: mockUser.name,
+      email: mockUser.email,
+      password: mockUser.password,
     });
 
-    expect(mockFind).toHaveBeenCalledWith({ email: 'j.doe@mail.com' });
     expect(User).toHaveBeenCalledWith('John Doe', 'j.doe@mail.com', 'pass');
-    expect(mockSave).toHaveBeenCalledWith({
-      _id: 'mock id',
-      name: 'mock name',
-      email: 'mock email',
-      password: 'pass',
-      date_created: new Date('2021-01-01 14:00:00'),
-      date_updated: new Date('2021-01-01 14:00:00'),
+    expect(usersRepositoryFindSpy).toHaveBeenCalledWith({
+      email: 'j.doe@mail.com',
     });
-    expect(createdUser).toMatchObject({
-      _id: 'mock id',
-      name: 'mock name',
-      email: 'mock email',
-      password: 'pass',
+    expect(usersRepositorySaveSpy).toHaveBeenCalledWith(mockUser);
+    expect(user).toMatchObject({
+      name: mockUser.name,
+      email: mockUser.email,
+      password: mockUser.password,
     });
   });
 
   it('should not create a duplicate user', async () => {
-    const createUser = new CreateUserService();
-
-    mockFind.mockImplementationOnce(() => ({
-      _id: 'mock id',
-      name: 'mock name',
-      email: 'mock email',
-      password: 'pass',
-      date_created: new Date('2021-01-01 14:00:00'),
-      date_updated: new Date('2021-01-01 14:00:00'),
-    }));
+    const usersRepositoryFindSpy = jest
+      .spyOn(UsersRepository.prototype, 'find')
+      .mockReturnValue(Promise.resolve(mockUser));
 
     await expect(createUser.execute({
-      name: 'mock name',
-      email: 'mock email',
-      password: 'pass',
+      name: mockUser.name,
+      email: mockUser.email,
+      password: mockUser.password,
     })).rejects.toThrowError(new AppError('duplicate email attempt', 409));
+    expect(usersRepositoryFindSpy).toHaveBeenCalledWith({
+      email: mockUser.email,
+    });
   });
 });
