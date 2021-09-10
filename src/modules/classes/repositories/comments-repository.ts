@@ -14,6 +14,20 @@ export default class CommentsRepository {
   }
 
   /**
+   * Count the doucments that match a filter.
+   *
+   * @param filters - MongoDB filters for the Comment entity.
+   *
+   * @returns The number of documents matching that filter
+   */
+  public async count(filters: Filter<Comment>): Promise<number> {
+    await mongoClient.connect();
+    const count = await this.collection.count(filters);
+
+    return count;
+  }
+
+  /**
    * Find one comment in the database.
    *
    * @param filters - MongoDB filters for the Comment entity.

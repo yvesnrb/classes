@@ -21,6 +21,27 @@ describe('UsersRepository', () => {
     await mongoClient.close();
   });
 
+  it('should count the documents in the database', async () => {
+    await commentsRepository.collection.insertMany([
+      {
+        _id: 'mock-comment-id-1',
+        id_class: 'mock-class-id',
+        comment: 'this is a mock comment',
+        date_created: new Date('01/01/2021 14:00:00.00Z'),
+      },
+      {
+        _id: 'mock-comment-id-2',
+        id_class: 'mock-class-id',
+        comment: 'this is another comment',
+        date_created: new Date('01/01/2021 14:00:00.00Z'),
+      },
+    ]);
+
+    const count = await commentsRepository.count({});
+
+    expect(count).toStrictEqual(2);
+  });
+
   it('should find one comment in the database', async () => {
     await commentsRepository.collection.insertOne({
       _id: 'mock guid',
