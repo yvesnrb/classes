@@ -78,4 +78,14 @@ export default class ClassesRepository {
       },
     );
   }
+
+  /**
+   * Remove an existing class from the database.
+   *
+   * @param id - The id of the class to remove.
+   */
+  public async remove(id: string): Promise<void> {
+    await mongoClient.connect();
+    await this.collection.deleteOne({ _id: id });
+  }
 }

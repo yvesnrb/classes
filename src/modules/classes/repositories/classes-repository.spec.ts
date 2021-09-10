@@ -123,4 +123,19 @@ describe('UsersRepository', () => {
       description: 'Updated description.',
     });
   });
+
+  it('should remove a saved class', async () => {
+    await classesCollection.insertOne(mockClass);
+    let myClass: Class | null = null;
+
+    myClass = await classesCollection.findOne({ _id: 'mock-class-id' });
+
+    expect(myClass).not.toBeNull();
+
+    await classesRepository.remove('mock-class-id');
+
+    myClass = await classesCollection.findOne({ _id: 'mock-class-id' });
+
+    expect(myClass).toBeNull();
+  });
 });
