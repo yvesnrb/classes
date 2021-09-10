@@ -9,7 +9,7 @@ export default class Comment {
   /**
    * GUID of the class this comment refers to.
    */
-  public readonly id_class: string;
+  public readonly classId: string;
 
   /**
    * The body of this comment.
@@ -19,19 +19,19 @@ export default class Comment {
   /**
    * The date in which this comment was created.
    */
-  public readonly date_created: Date;
+  public readonly dateCreated: Date;
 
   /**
-   * @param id_class - GUID of the class this comment refers to.
+   * @param classId - GUID of the class this comment refers to.
    *
    * @param comment - The body of this comment.
    */
-  constructor(id_class: string, comment: string) {
+  constructor(classId: string, comment: string) {
     const objectId = new ObjectId();
 
     this._id = objectId.toHexString();
-    this.id_class = id_class;
+    this.classId = classId;
     this.comment = comment;
-    this.date_created = new Date();
+    this.dateCreated = new Date();
   }
 }
