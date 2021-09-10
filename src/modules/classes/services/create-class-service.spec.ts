@@ -1,105 +1,73 @@
 import CreateClassService from '@services/create-class-service';
 import Class from '@entities/class-entity';
+import ClassesRepository from '@repositories/classes-repository';
 import AppError from '@errors/app-error';
 
-const mockSave = jest.fn().mockImplementation(() => ({
-  _id: 'mock guid',
+let createClass: CreateClassService;
+
+const mockClass: Class = {
+  _id: 'mock-class-id',
   name: 'Class 1',
   description: 'lorem ipsum dolorem sit amet',
   video: 'http://google.com',
-  data_init: new Date('01/01/2021 14:00:00'),
-  data_end: new Date('01/02/2021 14:00:00'),
-  date_created: new Date('01/01/2021 14:00:00.00Z'),
-  date_updated: new Date('01/01/2021 14:00:00.00Z'),
-}));
+  dateInit: new Date('01/01/2021 14:00:00'),
+  dateEnd: new Date('01/02/2021 14:00:00'),
+  dateCreated: new Date('01/01/2021 14:00:00.00Z'),
+  dateUpdated: new Date('01/01/2021 14:00:00.00Z'),
+};
 
-const mockFind = jest.fn().mockImplementation(() => null);
-
-jest.mock('@repositories/classes-repository', () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      save: mockSave,
-      find: mockFind,
-    };
-  });
-});
-
-jest.mock('@entities/class-entity', () => {
-  return jest.fn().mockImplementation(() => ({
-    _id: 'mock guid',
-    name: 'Class 1',
-    description: 'lorem ipsum dolorem sit amet',
-    video: 'http://google.com',
-    data_init: new Date('01/01/2021 14:00:00'),
-    data_end: new Date('01/02/2021 14:00:00'),
-    date_created: new Date('01/01/2021 14:00:00.00Z'),
-    date_updated: new Date('01/01/2021 14:00:00.00Z'),
-  }));
-});
+jest.mock('@entities/class-entity', () =>
+  jest.fn().mockImplementation(() => mockClass));
 
 describe('CreateUserService', () => {
+  beforeEach(() => {
+    createClass = new CreateClassService();
+  });
+
   it('should create a new class', async () => {
-    const createClass = new CreateClassService();
+    const classesRepositoryFindSpy = jest
+      .spyOn(ClassesRepository.prototype, 'find')
+      .mockReturnValue(Promise.resolve(null));
+
+    const classesRepositorySaveSpy = jest
+      .spyOn(ClassesRepository.prototype, 'save')
+      .mockReturnValue(Promise.resolve(undefined));
 
     const myClass = await createClass.execute({
       name: 'Class 1',
       description: 'lorem ipsum dolorem sit amet',
       video: 'http://google.com',
-      data_init: new Date('01/01/2021 14:00:00'),
-      data_end: new Date('01/02/2021 14:00:00'),
+      dateInit: new Date('01/01/2021 14:00:00'),
+      dateEnd: new Date('01/02/2021 14:00:00'),
     });
 
-    expect(mockFind).toHaveBeenCalledWith({ name: 'Class 1' });
+    expect(classesRepositoryFindSpy).toHaveBeenCalledWith({ name: 'Class 1' });
     expect(Class).toHaveBeenCalledWith({
       name: 'Class 1',
       description: 'lorem ipsum dolorem sit amet',
       video: 'http://google.com',
-      data_init: new Date('01/01/2021 14:00:00'),
-      data_end: new Date('01/02/2021 14:00:00'),
+      dateInit: new Date('01/01/2021 14:00:00'),
+      dateEnd: new Date('01/02/2021 14:00:00'),
     });
-    expect(mockSave).toHaveBeenCalledWith({
-      _id: 'mock guid',
-      name: 'Class 1',
-      description: 'lorem ipsum dolorem sit amet',
-      video: 'http://google.com',
-      data_init: new Date('01/01/2021 14:00:00'),
-      data_end: new Date('01/02/2021 14:00:00'),
-      date_created: new Date('01/01/2021 14:00:00.00Z'),
-      date_updated: new Date('01/01/2021 14:00:00.00Z'),
-    });
+    expect(classesRepositorySaveSpy).toHaveBeenCalledWith(mockClass);
     expect(myClass).toEqual({
-      _id: 'mock guid',
-      name: 'Class 1',
-      description: 'lorem ipsum dolorem sit amet',
-      video: 'http://google.com',
-      data_init: new Date('01/01/2021 14:00:00'),
-      data_end: new Date('01/02/2021 14:00:00'),
-      date_created: new Date('01/01/2021 14:00:00.00Z'),
-      date_updated: new Date('01/01/2021 14:00:00.00Z'),
-      total_comments: 0,
+      ...mockClass,
+      totalComments: 0,
     });
   });
 
   it('should not create a duplicate class', async () => {
-    const createClass = new CreateClassService();
-
-    mockFind.mockImplementationOnce(() => ({
-      _id: 'mock guid',
-      name: 'Class 1',
-      description: 'lorem ipsum dolorem sit amet',
-      video: 'http://google.com',
-      data_init: new Date('01/01/2021 14:00:00'),
-      data_end: new Date('01/02/2021 14:00:00'),
-      date_created: new Date('01/01/2021 14:00:00.00Z'),
-      date_updated: new Date('01/01/2021 14:00:00.00Z'),
-    }));
+    const classesRepositoryFindSpy = jest
+      .spyOn(ClassesRepository.prototype, 'find')
+      .mockReturnValue(Promise.resolve(mockClass));
 
     await expect(createClass.execute({
       name: 'Class 1',
       description: 'lorem ipsum dolorem sit amet',
       video: 'http://google.com',
-      data_init: new Date('01/01/2021 14:00:00'),
-      data_end: new Date('01/02/2021 14:00:00'),
+      dateInit: new Date('01/01/2021 14:00:00'),
+      dateEnd: new Date('01/02/2021 14:00:00'),
     })).rejects.toThrowError(new AppError('duplicate class name attempt', 409));
+    expect(classesRepositoryFindSpy).toHaveBeenCalledWith({ name: 'Class 1' });
   });
 });

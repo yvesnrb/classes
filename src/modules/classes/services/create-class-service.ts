@@ -6,12 +6,12 @@ interface IRequest {
   name: string;
   description: string;
   video: string;
-  data_init: Date;
-  data_end: Date;
+  dateInit: Date;
+  dateEnd: Date;
 }
 
 interface IResponse extends Class {
-  total_comments: number;
+  totalComments: number;
 }
 
 export default class CreateClassService {
@@ -26,8 +26,8 @@ export default class CreateClassService {
       name,
       description,
       video,
-      data_init,
-      data_end,
+      dateInit,
+      dateEnd,
     } = request;
     const sameNameClass = await this.classesRepository.find({ name });
 
@@ -39,14 +39,14 @@ export default class CreateClassService {
       name,
       description,
       video,
-      data_init,
-      data_end,
+      dateInit,
+      dateEnd,
     });
     await this.classesRepository.save(myClass);
 
     return {
       ...myClass,
-      total_comments: 0,
+      totalComments: 0,
     };
   }
 }
