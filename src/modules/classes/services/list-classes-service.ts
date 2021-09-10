@@ -5,15 +5,15 @@ import CommentsRepository from '@repositories/comments-repository';
 interface IRequest {
   name?: string;
   description?: string;
-  data_init?: Date;
-  data_end?: Date;
+  dateInit?: Date;
+  dateEnd?: Date;
   page?: number;
 }
 
 interface IResponse extends Class {
-  total_comments: number;
-  last_comment: string | null;
-  last_comment_date: Date | null;
+  totalComments: number;
+  lastComment: string | null;
+  lastCommentDate: Date | null;
 }
 
 export default class CreateClassService {
@@ -30,8 +30,8 @@ export default class CreateClassService {
     const {
       name,
       description,
-      data_init,
-      data_end,
+      dateInit,
+      dateEnd,
       page = 0,
     } = request;
     const skip = page * 50;
@@ -39,29 +39,29 @@ export default class CreateClassService {
     const list = await this.classesRepository.list({
       name,
       description,
-      data_init,
-      data_end,
+      dateInit,
+      dateEnd,
     }, skip, 50);
 
     const listWithComments = await Promise.all(
       list.map(async (myClass) => {
         const lastComment = await this.commentsRepository.list(
           {
-            id_class: myClass._id,
+            classId: myClass._id,
           },
           0,
           1,
         );
 
-        const total_comments = await this.commentsRepository.collection.count({
-          id_class: myClass._id,
+        const totalComments = await this.commentsRepository.count({
+          classId: myClass._id,
         });
 
         return {
           ...myClass,
-          last_comment: lastComment[0]?.comment || null,
-          last_comment_date: lastComment[0]?.date_created || null,
-          total_comments,
+          lastComment: lastComment[0]?.comment || null,
+          lastCommentDate: lastComment[0]?.dateCreated || null,
+          totalComments,
         };
       }),
     );

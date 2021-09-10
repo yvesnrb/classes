@@ -1,74 +1,71 @@
 import ListClassesService from '@services/list-classes-service';
+import Class from '@entities/class-entity';
+import Comment from '@entities/comment-entity';
+import ClassesRepository from '@repositories/classes-repository';
+import CommentsRepository from '@repositories/comments-repository';
 
-const mockClassesList = jest.fn().mockImplementation(() =>
-  Array.from({ length: 3 }, (_, index) => ({
-    _id: `${index + 1}`,
-    name: `Class ${index + 1}`,
-    description: 'lorem ipsum dolorem sit amet',
-    video: 'http://google.com',
-    data_init: new Date('01/01/2021 14:00:00'),
-    data_end: new Date('01/02/2021 14:00:00'),
-    date_created: new Date(),
-    date_updated: new Date(),
-  })));
+let listClasses: ListClassesService;
 
-jest.mock('@repositories/classes-repository', () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      list: mockClassesList,
-    };
-  });
-});
+const mockClass: Class = {
+  _id: 'mock-class-id-1',
+  name: 'Class 1',
+  description: 'lorem ipsum dolorem sit amet',
+  video: 'http://google.com',
+  dateInit: new Date('01/01/2021 14:00:00'),
+  dateEnd: new Date('01/02/2021 14:00:00'),
+  dateCreated: new Date('01/01/2021 14:00:00'),
+  dateUpdated: new Date('01/01/2021 14:00:00'),
+};
 
-const mockCommentsList = jest.fn().mockImplementation((filters) => {
-  if (filters.id_class === '1') {
-    return [{
-      _id: 'mock guid',
-      id_class: 'mock class id',
-      comment: 'this is a mock comment',
-      date_created: new Date('01/01/2021 14:00:00.00Z'),
-    }];
-  }
-
-  return [];
-});
-
-const mockCount = jest.fn().mockImplementation((filters) => {
-  if (filters.id_class === '1') {
-    return 1;
-  }
-
-  return 0;
-});
-
-jest.mock('@repositories/comments-repository', () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      list: mockCommentsList,
-      collection: {
-        count: mockCount,
-      },
-    };
-  });
-});
+const mockComment: Comment = {
+  _id: 'mock-comment-id',
+  classId: 'mock-class-id',
+  comment: 'This is a mock comment.',
+  dateCreated: new Date('01/01/2021 14:00:00.00Z'),
+};
 
 describe('ListClassesService', () => {
+  beforeEach(() => {
+    listClasses = new ListClassesService();
+  });
+
   it('should list the classes', async () => {
-    const listClasses = new ListClassesService();
+    jest.spyOn(ClassesRepository.prototype, 'list').mockReturnValue(
+      Promise.resolve([
+        { ...mockClass, _id: 'mock-class-id-1' },
+        { ...mockClass, _id: 'mock-class-id-2' },
+        { ...mockClass, _id: 'mock-class-id-3' },
+      ]),
+    );
+
+    jest
+      .spyOn(CommentsRepository.prototype, 'list')
+      .mockImplementation((filters) => {
+        if (filters.classId === 'mock-class-id-1') {
+          return Promise.resolve([mockComment]);
+        }
+
+        return Promise.resolve([]);
+      });
+
+    jest
+      .spyOn(CommentsRepository.prototype, 'count')
+      .mockImplementation((filters) => {
+        if (filters.classId === 'mock-class-id-1') {
+          return Promise.resolve(1);
+        }
+
+        return Promise.resolve(0);
+      });
 
     const list = await listClasses.execute({});
 
     expect(list).toHaveLength(3);
     expect(list[0]).toMatchObject({
-      _id: '1',
-      name: 'Class 1',
-      description: 'lorem ipsum dolorem sit amet',
-      video: 'http://google.com',
-      data_init: new Date('01/01/2021 14:00:00'),
-      data_end: new Date('01/02/2021 14:00:00'),
-      total_comments: 1,
-      last_comment: 'this is a mock comment',
-      last_comment_date: new Date('01/01/2021 14:00:00.00Z'),
+      ...mockClass,
+      totalComments: 1,
+      lastComment: 'This is a mock comment.',
+      lastCommentDate: new Date('01/01/2021 14:00:00.00Z'),
     });
   });
 });
